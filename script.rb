@@ -8,8 +8,16 @@ def extract(url)
 	parsed_html = Nokogiri::HTML(html)
 
 	productLinks = parsed_html.xpath('//div[@class="product-desc display_sd"]/a/@href')
-	File.open("out.txt", "a+") {|f| f.write(productLinks) }
-	File.open("out.txt", "a+") {|f| f.write("          ") }
+
+	productLinks.each { |link|
+    	productHttpRequest = Curl.get(link.to_s)
+    	productHtml = productHttpRequest.body_str
+    	parsed_productHtml = Nokogiri::HTML(productHtml)
+    	productTitle = parsed_productHtml.xpath('//h1[@class="product_main_name"]/text()')
+    	productPrice = parsed_productHtml.xpath('//span[@id="our_price_display"]/text()')
+    	puts productTitle
+    	puts productPrice
+	}
 
 	nextPageLink = parsed_html.xpath('//link[@rel="next"]/@href')
 	unless nextPageLink.empty?
