@@ -13,11 +13,44 @@ def extract(url)
     	productHttpRequest = Curl.get(link.to_s)
     	productHtml = productHttpRequest.body_str
     	parsed_productHtml = Nokogiri::HTML(productHtml)
+
     	productTitle = parsed_productHtml.xpath('//h1[@class="product_main_name"]/text()')
-    	productPrice = parsed_productHtml.xpath('//span[@id="our_price_display"]/text()')
-    	puts productTitle
-    	puts productPrice
+
+    	File.open("out.txt", "a+") {|f| f.write(productTitle) }
+    	File.open("out.txt", "a+") {|f| f.write("\n") }
+    	File.open("out.txt", "a+") {|f| f.write("ATTRIBUTES:") }
+    	File.open("out.txt", "a+") {|f| f.write("\n") }
+
+    	productAttributesList = parsed_productHtml.xpath('//ul[@class="attribute_radio_list pundaline-variations"]//li')
+    	productVariationsList = parsed_productHtml.xpath('//ul[@class="variation-selector"]//li')
+
+
+    	productAttributesList.each { |li|
+    		attributeName = li.xpath('//span[@class="radio_label"]/text()')
+    		attributePrice = li.xpath('//span[@class="price_comb"]/text()')
+    		File.open("out.txt", "a+") {|f| f.write(attributeName) }
+    		File.open("out.txt", "a+") {|f| f.write(" - ") }
+    		File.open("out.txt", "a+") {|f| f.write(attributePrice) }
+    		File.open("out.txt", "a+") {|f| f.write("\n") }
+
+    		File.open("out.txt", "a+") {|f| f.write("VARIATIONS:") }
+	    	File.open("out.txt", "a+") {|f| f.write("\n") }
+	    	
+	    	productVariationsList.each { |li|
+	    		variationName = li.xpath('./span[@class="variation-name"]/text()')
+	    		variationPrice = li.xpath('./span[@class="variation-price"]/text()')
+	    		File.open("out.txt", "a+") {|f| f.write(variationName) }
+	    		File.open("out.txt", "a+") {|f| f.write(" - ") }
+	    		File.open("out.txt", "a+") {|f| f.write(variationPrice) }
+	    		File.open("out.txt", "a+") {|f| f.write("\n") }
+	    	}
+
+    	}
+
+    	File.open("out.txt", "a+") {|f| f.write("\n\n\n\n\n\n\n\n") }
+
 	}
+
 
 	nextPageLink = parsed_html.xpath('//link[@rel="next"]/@href')
 	unless nextPageLink.empty?
