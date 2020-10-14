@@ -1,9 +1,10 @@
 require 'curb'
 require 'nokogiri'
+require 'csv'
 
 scannedPages = 0
 
-def extract(url)
+def extract(url, fileName)
 	puts "scrapping " + url + "\n..."
 	httpRequest = Curl.get(url)
 	html = httpRequest.body_str
@@ -18,15 +19,23 @@ def extract(url)
 
     	productTitle = parsed_productHtml.xpath('//h1[@class="product_main_name"]/text()')
 
-    	File.open("out.txt", "a+") {|f| f.write(productTitle) }
-    	File.open("out.txt", "a+") {|f| f.write("\n\n") }
+    	File.open("out.txt", "a+") {|f| f.write(productTitle, "\n") }
+
+    	
 
     	productAttributesNames = parsed_productHtml.xpath('//ul[@class="attribute_radio_list pundaline-variations"]//li//label/span[@class="radio_label"]')
     	productAttributesPrices = parsed_productHtml.xpath('//ul[@class="attribute_radio_list pundaline-variations"]//li//label/span[@class="price_comb"]/text()')
 
     	i = 0
-    	productAttributesNames.each { |attributeName|    		
-    		File.open("out.txt", "a+") {|f| f.write(attributeName.xpath('text()'), " - ", productAttributesPrices[i].to_s, "\n\n") }
+    	productAttributesNames.each { |attributeName|
+
+    		productName = productTitle.to_s + " " + (attributeName.xpath('text()')).to_s
+    		productPrice = productAttributesPrices[i].to_s
+
+    		CSV.open(fileName + ".csv", "a+") do |csv|
+				csv << [productName, productPrice, "image"]
+			end
+
     		i += 1	
     	}
 
@@ -46,7 +55,7 @@ def extract(url)
 		sleep(1)
   		puts "link to the next page found:" + nextPageLink.to_s
   		begin
-  			extract(nextPageLink.to_s)
+  			extract(nextPageLink.to_s, fileName)
   		rescue
   			puts "Some connection error occured. Trying to reconnect..."
   			puts "Please wait - 3"
@@ -55,18 +64,27 @@ def extract(url)
 			sleep(1)
 			puts "Please wait - 1"
 			sleep(1)
-			extract(nextPageLink.to_s)
+			extract(nextPageLink.to_s, fileName)
 		end
 	end
-	puts "Category scrapping finished successfully"
+	puts "No more pages in the category!"
+	puts "Category scrapping finished successfully!"
 end
 
 
 
 # categoryUrl = "https://www.petsonic.com/snacks-huesos-para-perros/"
-puts "Enter a category url:"
+# https://www.petsonic.com/tienda-perros/
+puts "Enter category url:"
 categoryUrl = gets.chomp
-extract(categoryUrl.to_s)
+puts "Enter file name (will be saved as CSV):"
+fileName = gets.chomp
+
+CSV.open(fileName + ".csv", "a+") do |csv|
+	csv << ["Name", "Price", "Image"]
+end
+
+extract(categoryUrl.to_s, fileName.to_s)
 
 
 
