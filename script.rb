@@ -1,8 +1,10 @@
 require 'curb'
 require 'nokogiri'
 
+scannedPages = 0
+
 def extract(url)
-	puts "extract function initiated"
+	puts "scrapping " + url + "\n..."
 	httpRequest = Curl.get(url)
 	html = httpRequest.body_str
 	parsed_html = Nokogiri::HTML(html)
@@ -35,17 +37,36 @@ def extract(url)
 
 	nextPageLink = parsed_html.xpath('//link[@rel="next"]/@href')
 	unless nextPageLink.empty?
-  		puts "next page link found:"
-  		puts nextPageLink
-  		extract(nextPageLink.to_s)
+		puts "page scrapping finished successfully"
+		puts "Please wait - 3"
+		sleep(1)
+		puts "Please wait - 2"
+		sleep(1)
+		puts "Please wait - 1"
+		sleep(1)
+  		puts "link to the next page found:" + nextPageLink.to_s
+  		begin
+  			extract(nextPageLink.to_s)
+  		rescue
+  			puts "Some connection error occured. Trying to reconnect..."
+  			puts "Please wait - 3"
+			sleep(1)
+			puts "Please wait - 2"
+			sleep(1)
+			puts "Please wait - 1"
+			sleep(1)
+			extract(nextPageLink.to_s)
+		end
 	end
+	puts "Category scrapping finished successfully"
 end
 
 
 
-categoryUrl = "https://www.petsonic.com/snacks-huesos-para-perros/"
-puts "START:"
-extract(categoryUrl)
+# categoryUrl = "https://www.petsonic.com/snacks-huesos-para-perros/"
+puts "Enter a category url:"
+categoryUrl = gets.chomp
+extract(categoryUrl.to_s)
 
 
 
