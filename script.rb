@@ -17,34 +17,15 @@ def extract(url)
     	productTitle = parsed_productHtml.xpath('//h1[@class="product_main_name"]/text()')
 
     	File.open("out.txt", "a+") {|f| f.write(productTitle) }
-    	File.open("out.txt", "a+") {|f| f.write("\n") }
-    	File.open("out.txt", "a+") {|f| f.write("ATTRIBUTES:") }
-    	File.open("out.txt", "a+") {|f| f.write("\n") }
+    	File.open("out.txt", "a+") {|f| f.write("\n\n") }
 
-    	productAttributesList = parsed_productHtml.xpath('//ul[@class="attribute_radio_list pundaline-variations"]//li')
-    	productVariationsList = parsed_productHtml.xpath('//ul[@class="variation-selector"]//li')
+    	productAttributesNames = parsed_productHtml.xpath('//ul[@class="attribute_radio_list pundaline-variations"]//li//label/span[@class="radio_label"]')
+    	productAttributesPrices = parsed_productHtml.xpath('//ul[@class="attribute_radio_list pundaline-variations"]//li//label/span[@class="price_comb"]/text()')
 
-
-    	productAttributesList.each { |li|
-    		attributeName = li.xpath('//span[@class="radio_label"]/text()')
-    		attributePrice = li.xpath('//span[@class="price_comb"]/text()')
-    		File.open("out.txt", "a+") {|f| f.write(attributeName) }
-    		File.open("out.txt", "a+") {|f| f.write(" - ") }
-    		File.open("out.txt", "a+") {|f| f.write(attributePrice) }
-    		File.open("out.txt", "a+") {|f| f.write("\n") }
-
-    		File.open("out.txt", "a+") {|f| f.write("VARIATIONS:") }
-	    	File.open("out.txt", "a+") {|f| f.write("\n") }
-	    	
-	    	productVariationsList.each { |li|
-	    		variationName = li.xpath('./span[@class="variation-name"]/text()')
-	    		variationPrice = li.xpath('./span[@class="variation-price"]/text()')
-	    		File.open("out.txt", "a+") {|f| f.write(variationName) }
-	    		File.open("out.txt", "a+") {|f| f.write(" - ") }
-	    		File.open("out.txt", "a+") {|f| f.write(variationPrice) }
-	    		File.open("out.txt", "a+") {|f| f.write("\n") }
-	    	}
-
+    	i = 0
+    	productAttributesNames.each { |attributeName|    		
+    		File.open("out.txt", "a+") {|f| f.write(attributeName.xpath('text()'), " - ", productAttributesPrices[i].to_s, "\n\n") }
+    		i += 1	
     	}
 
     	File.open("out.txt", "a+") {|f| f.write("\n\n\n\n\n\n\n\n") }
